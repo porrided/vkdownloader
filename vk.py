@@ -1,4 +1,5 @@
 #!/usr/bin/env python3 
+# vim: sts=4 sw=4 ai et
 # PYTHON_ARGCOMPLETE_OK
 
 # Copyright 2013 Alexey Kardapoltsev
@@ -19,46 +20,61 @@ import argparse
 import json, sys, os
 from vkdownloader import VkDownloader
 
-def process_music(args):
-  if args.action == "load":
-    vk.load(args.user, args.dest, args.clean)
-  elif args.action == "list":
-    vk.show(args.user)
-  elif args.action == "play": 
-    vk.play(args.user)
-  else:
-    print("unknown action")
+arg_help_strings = {
+    "user": "specify VK user id to log in as",
+    "destdir": "specify destination directory to download to. Defaults to current directory",
+    "clean_destdir": "clean destination directory before downloading",
+    "friendlist_action": "Possible friendlist actions. Not much of them yet",
+    "music_action": "All the things about music"
+}
 
-def process_friends(args):
-  if args.action == "list":
-    vk.show_friends(args.user)
-  else:
-    print("unknown action")
+def process(section, action, user, **kwargs):
+    if section == "music":
+        if action in ("load", "dl"):
+            vk.load(user, destdir, clean_destdir)
+        elif action == "list":
+            vk.show(user)
+        elif action == "play":
+            vk.play(user)
+        else:
+            print("Unknown action", file=sys.stderr)
+    elif section == "friends":
+        if action == "list":
+            vk.show_friends(user)
+        else:
+            print("Unknown action", file=sys.stderr)
 
-topParser = argparse.ArgumentParser()
+main_parser = argparse.ArgumentParser()
 
-topParser.add_argument("-u", "--user", help = "user id")
-subParsers = topParser.add_subparsers(title = "Command categories")
-music = subParsers.add_parser("music", description = "working with music")
-friends = subParsers.add_parser("friends", description = "working with friends")
+main_parser.add_argument("-u", "--user", metavar="user_id", help=arg_help_strings["user"])
+subParsers = main_parser.add_subparsers(title="Command sections")
+musicp = subParsers.add_parser("music", description="Actions related to music")
+friendsp = subParsers.add_parser("friends", description="Actions related to friendlist")
 
-friends.add_argument("action", help = "friends actions", choices=["list"])
-friends.set_defaults(func = process_friends)
+friendsp.add_argument("action", help=arg_help_strings["friendlist_action"], choices=["list"])
+friendsp.set_defaults(section="friends")
 
-music.add_argument("action", help = "music actions", choices=["list", "load", "play"])
-music.add_argument("-d", "--dest", help = "destination directory for music download, default is current dir")
-music.add_argument("-c", "--clean", dest='clean', action='store_true', help = "with this options destination directory will be cleaned")
-music.set_defaults(clean = False)
-music.set_defaults(func = process_music)
+musicp.add_argument("action", help=arg_help_strings["music_action"],
+        choices=["list", "load", "dl", "play"])
+musicp.add_argument("-d", "--dest", "--destination", dest="destdir", help=arg_help_strings["destdir"])
+musicp.add_argument("-c", "--clean", dest='clean_destdir', action='store_true', help=arg_help_strings["clean_destdir"])
+musicp.set_defaults(clean_destdir=False)
+musicp.set_defaults(destdir=os.getcwd())
+musicp.set_defaults(section="music")
 
 try:
     import argcomplete
-    argcomplete.autocomplete(topParser)
+    argcomplete.autocomplete(main_parser)
 except ImportError:
     pass
 
-args = topParser.parse_args()
-
+args = main_parser.parse_args()
 vk = VkDownloader()
 
-args.func(args)
+try:
+    process(**vars(args))
+except AttributeError:
+    print("Nothing specified, nothing to do.", file=sys.stderr)
+    main_parser.print_help(file=sys.stderr)
+    sys.exit(1)
+
