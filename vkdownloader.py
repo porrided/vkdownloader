@@ -37,7 +37,7 @@ APP_ID = '4065695'
 # chars to exclude from filename
 FORBIDDEN_CHARS = '/\\\?%*:|"<>!'
 # vk.com api url
-BASE_URL = "https://api.vkontakte.ru/method/"
+BASE_URL = "https://api.vk.com/method/"
 
 class VkDownloader:
 

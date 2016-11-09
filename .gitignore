@@ -1,1 +1,13 @@
+#
+**/*~
+**/*.swp
+**/*.swo
+**/.#*
+**/*.tmp
+**/thumbs.db
+**/.DS_Store
+**/.dylib
+**/*.dSYM/
+
 __pycache__
+
