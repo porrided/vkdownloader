@@ -50,7 +50,10 @@ class VkDownloader:
             self.homedir = os.path.expanduser("~")
 
         # file, where auth data is saved
-        self.auth_file = join(self.homedir, '.vkrc')
+        if os.name == "posix":
+            self.auth_file = os.path.join(self.homedir, ".config/vkdl/rc")
+        else:
+            self.auth_file = os.path.join(self.homedir, "vkdl\\rc")
         token, user_id = self.auth()
         self.access_token = token
         self.user_id = user_id

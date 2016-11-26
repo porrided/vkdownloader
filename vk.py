@@ -28,7 +28,7 @@ arg_help_strings = {
     "music_action": "All the things about music"
 }
 
-def process(section, action, user, **kwargs):
+def process(section, action, **kwargs):
     if section == "music":
         if action in ("load", "dl"):
             vk.load(user, destdir, clean_destdir)
@@ -48,19 +48,19 @@ main_parser = argparse.ArgumentParser()
 
 main_parser.add_argument("-u", "--user", metavar="user_id", help=arg_help_strings["user"])
 subParsers = main_parser.add_subparsers(title="Command sections")
-musicp = subParsers.add_parser("music", description="Actions related to music")
-friendsp = subParsers.add_parser("friends", description="Actions related to friendlist")
+music_sp = subParsers.add_parser("music", description="Actions related to music")
+friends_sp = subParsers.add_parser("friends", description="Actions related to friendlist")
 
-friendsp.add_argument("action", help=arg_help_strings["friendlist_action"], choices=["list"])
-friendsp.set_defaults(section="friends")
+friends_sp.add_argument("action", help=arg_help_strings["friendlist_action"], choices=["list"])
+friends_sp.set_defaults(section="friends")
 
-musicp.add_argument("action", help=arg_help_strings["music_action"],
+music_sp.add_argument("action", help=arg_help_strings["music_action"],
         choices=["list", "load", "dl", "play"])
-musicp.add_argument("-d", "--dest", "--destination", dest="destdir", help=arg_help_strings["destdir"])
-musicp.add_argument("-c", "--clean", dest='clean_destdir', action='store_true', help=arg_help_strings["clean_destdir"])
-musicp.set_defaults(clean_destdir=False)
-musicp.set_defaults(destdir=os.getcwd())
-musicp.set_defaults(section="music")
+music_sp.add_argument("-d", "--dest", "--destination", dest="destdir", help=arg_help_strings["destdir"])
+music_sp.add_argument("-c", "--clean", dest='clean_destdir', action='store_true', help=arg_help_strings["clean_destdir"])
+music_sp.set_defaults(clean_destdir=False)
+music_sp.set_defaults(destdir=os.getcwd())
+music_sp.set_defaults(section="music")
 
 try:
     import argcomplete
@@ -71,10 +71,10 @@ except ImportError:
 args = main_parser.parse_args()
 vk = VkDownloader()
 
-try:
-    process(**vars(args))
-except AttributeError:
-    print("Nothing specified, nothing to do.", file=sys.stderr)
-    main_parser.print_help(file=sys.stderr)
-    sys.exit(1)
+#try:
+process(**vars(args))
+#except NameError:
+#    print("Nothing specified, nothing to do.", file=sys.stderr)
+#    main_parser.print_help(file=sys.stderr)
+#    sys.exit(1)
 
